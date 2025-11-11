@@ -7,7 +7,7 @@ def obtener_conexion():
         conexion = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='TU_PASSWORD',   # reemplazá con tu contraseña real
+            password='',   # reemplazá con tu contraseña real
             database='ecommerce_db'
         )
         if conexion.is_connected():
@@ -16,4 +16,4 @@ def obtener_conexion():
         print("Error al conectar con MySQL:", e)
         return None
 
-#⚠️ Si usás XAMPP o WAMP, asegurate de que el servicio de MySQL esté iniciado.
+#⚠️ Se uso XAMPP o WAMP, asegurate de que el servicio de MySQL esté iniciado.

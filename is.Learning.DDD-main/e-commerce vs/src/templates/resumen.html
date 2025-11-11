@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resumen del Pedido</title>
+</head>
+<body>
+  <h1>Resumen del Pedido</h1>
+  {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+  {% if confirmado %}<p style="color:green">Pedido confirmado.</p>{% endif %}
+  {% if vacio %}
+    <p>Pedido vacío</p>
+  {% else %}
+    <ul>
+      {% for it in items %}
+        <li>{{ it.cantidad }} x {{ it.nombre }} = ${{ '%.2f'|format(it.cantidad * it.precio) }}</li>
+      {% endfor %}
+    </ul>
+    <p><strong>Total:</strong> ${{ '%.2f'|format(total) }}</p>
+    <form method="POST" action="/pedido/confirmar">
+      <button type="submit">Confirmar Pedido</button>
+    </form>
+  {% endif %}
+  <p><a href="/">Seguir comprando</a></p>
+</body>
+</html>
+

@@ -2,92 +2,61 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>E-commerce</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-
+    <link rel="icon" href="{{ url_for('static', filename='logotipo.png') }}" />
     <style>
         body { font-family: Arial, sans-serif; margin: 16px; }
         form { margin-bottom: 16px; }
         img { display: block; margin: 8px 0; }
         hr { margin: 16px 0; }
+        header .container { display: flex; align-items: center; justify-content: space-between; }
+        .cartas { border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
     </style>
-    <link rel="icon" href="{{ url_for('static', filename='logotipo.png') }}" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 </head>
 <body>
-    <form method="POST" action="/login">
-        <label for="usuario">Usuario</label>
-        <input id="usuario" type="email" placeholder="Ingrese su usuario" name="usuario" required />
-        <label for="contrasena">Contraseña</label>
-        <input id="contrasena" type="password" placeholder="Ingrese su contraseña" name="contrasena" required />
-        <button type="submit">Iniciar sesión</button>
-    </form>
+    <header>
+        <div class="container">
+            <p class="logo">e-commerce</p>
+            <nav>
+                <a href="/">Inicio</a>
+                <a href="/productos">Productos</a>
+                <a href="/carrito">Carrito</a>
+                <a href="/perfil">Perfil</a>
+                <a href="/logout">Cerrar sesión</a>
+            </nav>
+        </div>
+    </header>
 
-    <hr width="100%" />
-        <header>
-            <div class="container">
-                <p class="logo">e-commerce</p>
-                <nav>
-                    <a href="/">Inicio</a>
-                    <a href="/productos">Productos</a>
-                    <a href="/carrito">Carrito</a>
-                    <a href="/perfil">Perfil</a>
-                    <a href="/logout">Cerrar sesión</a>
-                </nav>
-            </div>
-        </header>
-    <img src="{{ url_for('static', filename='logotipo.png') }}" width="300" height="200" alt="Logotipo" />
-    <h1 style="text-align:center">Bienvenido a la página principal del proyecto final de E-commerce Website de Camilo Guevara</h1>
+    <img src="{{ url_for('static', filename='logotipo.png') }}" width="240" height="160" alt="Logotipo" />
+    <h1 style="text-align:center">Bienvenido al proyecto de E‑commerce</h1>
+
     <form method="GET" action="/buscar">
         <input type="text" placeholder="Buscar productos..." name="q" />
         <button type="submit">Buscar</button>
     </form>
-        <section>
-            <div class="container">
-                <h2>Catálogo de productos</h2>
-                <div class="img-container"></div>
-            </div>
-        </section>
-    <hr width="100%" />
-
-    <p>Productos:</p>
 
     <section id="productos">
-        <div class="cartas">
-            <h3>Producto Destacado1</h3>
-            <img src="{{ url_for('static', filename=(productos[0].imagenURL if productos[0].imagenURL else ('producto ' ~ productos[0].id ~ '.jpeg'))) }}" width="200" height="180" alt="{{ productos[0].nombre }}" />
-            <button type="button">Añadir al carrito</button>
-
-        </div>
-        <div class="cartas">
-            <h3>Producto Destacado2</h3>
-            <img src="{{ url_for('static', filename=(productos[1].imagenURL if productos[1].imagenURL else ('producto ' ~ productos[1].id ~ '.jpeg'))) }}" width="200" height="180" alt="{{ productos[1].nombre }}" />
-            <button type="button">Añadir al carrito</button>
-
-        </div>
-        <div class="cartas">
-            <h3>Producto Destacado3</h3>
-            <img src="{{ url_for('static', filename=(productos[0].imagenURL if productos[0].imagenURL else ('producto ' ~ productos[0].id ~ '.jpeg'))) }}" width="200" height="180" alt="{{ productos[0].nombre }}" />
-            <button type="button">Añadir al carrito</button>
-
-        </div>
+        <h2>Catálogo de productos</h2>
+        {% if productos %}
+            {% for p in productos %}
+            <div class="cartas">
+                <h3>{{ p.nombre }}</h3>
+                <img src="{{ url_for('static', filename=(p.imagenURL if p.imagenURL else ('producto ' ~ p.id ~ '.jpeg'))) }}" width="200" height="180" alt="{{ p.nombre }}" />
+                <p>${{ '%.2f'|format(p.precio) }}</p>
+                <form method="POST" action="/pedido/agregar">
+                    <input type="hidden" name="id" value="{{ p.id }}" />
+                    <label for="cantidad{{ p.id }}">Cantidad:</label>
+                    <input id="cantidad{{ p.id }}" type="number" value="1" min="1" name="cantidad" />
+                    <button type="submit">Añadir al pedido</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay productos disponibles.</p>
+        {% endif %}
     </section>
-
-    {% if productos %}
-    {% for p in productos %}
-    <img src="{{ url_for('static', filename=(p.imagenURL if p.imagenURL else ('producto ' ~ p.id ~ '.jpeg'))) }}" width="200" height="180" alt="{{ p.nombre }}" />
-    <p>{{ p.nombre }} - ${{ '%.2f'|format(p.precio) }} <button type="button">Añadir al carrito</button></p>
-    <form>
-        <label for="cantidad{{ p.id }}">Cantidad:</label>
-        <input id="cantidad{{ p.id }}" type="number" value="1" min="1" name="cantidad{{ p.id }}" />
-    </form>
-    <hr width="100%" />
-    {% endfor %}
-    {% else %}
-    <p>No hay productos disponibles.</p>
-    {% endif %}
 
 </body>
 </html>

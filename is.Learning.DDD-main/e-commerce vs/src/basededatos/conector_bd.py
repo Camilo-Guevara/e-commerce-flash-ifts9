@@ -1,87 +1,78 @@
-import hashlib
-import secrets
-from typing import Optional
+import hashlib # Para hashing de contraseñas
+import secrets # Para generar salt aleatorio
+from typing import Optional 
 
-from .config_bd import conectar_bd
-from ..modelos.usuario import Usuario
+from .config_bd import obtener_conexion 
+from ..modelos.usuario import Usuario 
 
 
 class RepositorioUsuario:
-    """Operaciones de persistencia para usuarios en MySQL."""
+    """Operaciones de persistencia para la tabla Usuario."""
 
     @staticmethod
-    def insertar_usuario(correo: str, contrasena: str) -> Usuario:
-        db = conectar_bd()
-        cursor = db.cursor()
+    def insertar_usuario(correo: str, contrasena: str, rol: str = "Cliente") -> Usuario:
+        con = obtener_conexion() # Obtener conexión a BD
+        cur = con.cursor() 
         try:
-            salt = secrets.token_hex(16)
-            password_hash = hashlib.sha256((contrasena + salt).encode()).hexdigest()
-            cursor.execute(
+            # Usa el mismo algoritmo que el modelo Usuario (sha512 + salt)
+            hashed, salt = Usuario.hash_password(contrasena)
+            cur.execute(
                 """
-                INSERT INTO usuarios (correo, password_salt, password_hash)
-                VALUES (%s, %s, %s)
+                INSERT INTO Usuario (correo, rol, passwordHash, passwordSalt)
+                VALUES (%s, %s, %s, %s)
                 """,
-                (correo, salt, password_hash),
-            )
-            db.commit()
-            user_id = cursor.lastrowid
-
-            # Construir instancia de dominio con valores persistidos
-            usuario = Usuario(user_id, correo, "dummy")
-            usuario.passwordSalt = salt
-            usuario.passwordHash = password_hash
-            return usuario
+                (correo, rol, hashed, salt),
+            ) 
+            con.commit() # Confirmar cambios
+            user_id = cur.lastrowid
+            return Usuario(id=user_id, correo=correo, rol=rol, passwordHash=hashed, passwordSalt=salt)
         finally:
-            cursor.close()
-            db.close()
+            cur.close()
+            con.close()
 
     @staticmethod
-    def obtener_por_correo(correo: str) -> Optional[Usuario]:
-        db = conectar_bd()
-        cursor = db.cursor()
+    def obtener_por_correo(correo: str) -> Optional[Usuario]: # Devuelve Usuario o None
+        con = obtener_conexion()
+        cur = con.cursor(dictionary=True) # Diccionario para mapear columnas a atributos
         try:
-            cursor.execute(
-                "SELECT id, correo, password_salt, password_hash FROM usuarios WHERE correo = %s",
+            cur.execute( # Consulta parametrizada para evitar SQL injection
+                "SELECT * FROM Usuario WHERE correo = %s",
                 (correo,),
             )
-            row = cursor.fetchone()
+            row = cur.fetchone()
             if not row:
                 return None
-            user_id, correo_db, salt, password_hash = row
-            usuario = Usuario(user_id, correo_db, "dummy")
-            usuario.passwordSalt = salt
-            usuario.passwordHash = password_hash
-            return usuario
+            return Usuario(**row)
         finally:
-            cursor.close()
-            db.close()
+            cur.close()
+            con.close()
 
     @staticmethod
     def actualizar_correo(user_id: int, nuevo_correo: str) -> None:
-        db = conectar_bd()
-        cursor = db.cursor()
+        con = obtener_conexion()
+        cur = con.cursor()
         try:
-            cursor.execute(
-                "UPDATE usuarios SET correo = %s WHERE id = %s",
+            cur.execute(
+                "UPDATE Usuario SET correo = %s WHERE id = %s",
                 (nuevo_correo, user_id),
             )
-            db.commit()
+            con.commit()
         finally:
-            cursor.close()
-            db.close()
+            cur.close()
+            con.close()
 
     @staticmethod
     def actualizar_contrasena(user_id: int, nueva_contrasena: str) -> None:
-        db = conectar_bd()
-        cursor = db.cursor()
+        con = obtener_conexion()
+        cur = con.cursor()
         try:
-            salt = secrets.token_hex(16)
-            password_hash = hashlib.sha256((nueva_contrasena + salt).encode()).hexdigest()
-            cursor.execute(
-                "UPDATE usuarios SET password_salt = %s, password_hash = %s WHERE id = %s",
-                (salt, password_hash, user_id),
+            hashed, salt = Usuario.hash_password(nueva_contrasena)
+            cur.execute(
+                "UPDATE Usuario SET passwordHash = %s, passwordSalt = %s WHERE id = %s",
+                (hashed, salt, user_id),
             )
-            db.commit()
+            con.commit()
         finally:
-            cursor.close()
-            db.close()
+            cur.close()
+            con.close()
+

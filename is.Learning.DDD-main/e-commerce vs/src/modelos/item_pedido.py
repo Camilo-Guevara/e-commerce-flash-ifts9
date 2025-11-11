@@ -1,4 +1,4 @@
-from database.db_config import obtener_conexion
+from basededatos.config_bd import obtener_conexion
 
 class ItemPedido:
     def __init__(self, idPedido, idProducto, cantidad, precioUnitario):
