@@ -28,3 +28,6 @@ jobs:
         run: |
           python -m compileall -q src
 
+      - name: Run MySQL configuration unit tests
+        working-directory: is.Learning.DDD-main/e-commerce vs
+        run: python -m unittest discover -s tests -v
