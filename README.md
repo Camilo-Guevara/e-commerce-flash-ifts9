@@ -13,7 +13,7 @@ Características
 Cómo ejecutar rápidamente (Windows PowerShell)
 1) Crear entorno: `python -m venv .venv` y activar `.venv\Scripts\Activate.ps1`
 2) Instalar deps: `pip install -r "is.Learning.DDD-main/e-commerce vs/requirements.txt"`
-3) Configurar MySQL en `is.Learning.DDD-main/e-commerce vs/src/basededatos/config_bd.py`
+3) Configurar las variables de entorno de MySQL y `FLASK_SECRET_KEY` como indica `is.Learning.DDD-main/e-commerce vs/README.md`
 4) Ejecutar: `python "is.Learning.DDD-main/e-commerce vs/src/app.py"`
 
 CI

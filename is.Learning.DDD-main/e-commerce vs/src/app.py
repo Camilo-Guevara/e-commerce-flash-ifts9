@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from controladores.controlador_producto import ControladorProducto
 from controladores.controlador_pedido import ControladorPedido
@@ -6,7 +7,11 @@ from modelos.usuario import Usuario
 
 # Configurar Flask: templates en 'templates' y estáticos en 'img'
 app = Flask(__name__, template_folder='templates', static_folder='img')
-app.secret_key = "dev-secret-key"
+# La clave de firma de sesiones debe venir del entorno; no usar una clave pública.
+flask_secret = os.environ.get("FLASK_SECRET_KEY")
+if not flask_secret or len(flask_secret) < 32:
+    raise RuntimeError("Define FLASK_SECRET_KEY con al menos 32 caracteres en el entorno")
+app.secret_key = flask_secret
 productos_ctrl = ControladorProducto()
 pedido_ctrl = ControladorPedido()
 
@@ -144,7 +149,7 @@ def pedido_confirmar():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
 
 
 # CLI de desarrollo: sembrar productos de ejemplo

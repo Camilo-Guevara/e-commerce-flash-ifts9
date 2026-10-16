@@ -96,3 +96,11 @@ docker-compose.debug.yml
 
 # Dependency scanning
 packages.lock.json
+
+# Proyecto Python: archivos generados y secretos
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
